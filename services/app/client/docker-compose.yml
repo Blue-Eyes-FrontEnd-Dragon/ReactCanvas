@@ -1,0 +1,31 @@
+version: '3.8'
+
+networks:
+  microservice-network:
+    external:
+      name: microservice-network
+  app-network:
+    external:
+      name: app-network
+
+services:
+
+  app-client:
+    build:
+      context: .
+      dockerfile: ${DOCKERFILE}
+    container_name: app-client
+    volumes:
+      - ./src:/opt/app/client/src
+      - /opt/app/client/node_modules
+    tty: true
+    stdin_open: true
+    environment:
+      CLIENT_PORT: ${APP_INTERNAL_PORT}
+      CHOKIDAR_USEPOLLING: true
+      LOCAL_HOST: '0.0.0.0' # Docker local host
+    ports:
+      - ${APP_EXTERNAL_PORT}:${APP_INTERNAL_PORT}
+    networks:
+      - microservice-network
+      - app-network

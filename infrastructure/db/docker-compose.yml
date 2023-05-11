@@ -1,0 +1,41 @@
+version: '3.8'
+
+networks:
+  microservice-network:
+    external:
+      name: microservice-network
+
+volumes:
+  app-data:
+
+services:
+
+  app-db:
+    image: postgres:15.2
+    restart: unless-stopped
+    tty: true
+    container_name: app-db
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      SERVICE_TAGS: dev
+      SERVICE_NAME: app-db
+    volumes:
+      - app-data:/var/lib/postgresql/data
+      - ./init:/docker-entrypoint-initdb.d/
+    networks:
+      - microservice-network
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    ports:
+      - 8081:8080
+    restart: always
+    depends_on:
+      - app-db
+    networks:
+      - microservice-network
